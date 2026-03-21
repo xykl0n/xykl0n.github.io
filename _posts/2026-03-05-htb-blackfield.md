@@ -1,7 +1,7 @@
 ---
 title: "HTB - Blackfield"
 date: 2026-03-05
-categories: [HTB, Active Directory]
+categories: [HTB, HTB-AD]
 tags: [Windows, AD, AS-REP-Roasting, ACL-Abuse, LSASS, Backup-Operators, Pass-the-Hash, BloodHound, kerbrute]
 image:
   path: /assets/img/blackfield/blackfield.png
