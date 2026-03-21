@@ -293,39 +293,39 @@ Domain fully compromised.
 ## Attack Flow
 
 ```text
-                            BLACKFIELD.local
-																	 |
-													  +--------------+--------------+
-													  |                             |
-												 [Guest SMB]                  [RID Cycling]
-												 profiles$ READ               users.txt
-													  |                             |
-													  +-------------+---------------+
-																	|
-																 [AS-REP Roast]
-														  kerbrute --downgrade
-																	|
-														   support:#00^BlackKnight
-																	|
-																 [BloodHound]
-														  ForceChangePassword
-																	|
-														   audit2020:Password123
-																	|
-														  [forensic share READ]
-																 lsass.zip / lsass.DMP
-																	|
-																 [pypykatz parse]
-														  svc_backup NT hash
-																	|
-																  [WinRM PTH]
-														  Backup Operators group
-																	|
-													  [diskshadow + robocopy + reg save]
-														  ntds.dit + SYSTEM hive
-																	|
-														   [secretsdump local]
-														  Administrator NT hash
-																	|
-															DOMAIN COMPROMISED
+BLACKFIELD.local
+								       |
+								+--------------+--------------+
+								|                             |
+							[Guest SMB]                  [RID Cycling]
+							  profiles$ READ               users.txt
+								|                             |
+								+-------------+---------------+
+								               |
+								         [AS-REP Roast]
+								      kerbrute --downgrade
+								               |
+								    support:#00^BlackKnight
+								               |
+								          [BloodHound]
+								      ForceChangePassword
+								               |
+								     audit2020:Password123
+								               |
+								     [forensic share READ]
+								     lsass.zip / lsass.DMP
+								               |
+								        [pypykatz parse]
+								       svc_backup NT hash
+								               |
+								          [WinRM PTH]
+								     Backup Operators group
+								               |
+								[diskshadow + robocopy + reg save]
+								     ntds.dit + SYSTEM hive
+								               |
+								      [secretsdump local]
+								     Administrator NT hash
+								               |
+								       DOMAIN COMPROMISED
 ```
