@@ -293,7 +293,7 @@ Domain fully compromised.
 ## Attack Flow
 
 ```text
-                                            BLACKFIELD.local
+                            BLACKFIELD.local
 																	 |
 													  +--------------+--------------+
 													  |                             |
