@@ -7,10 +7,9 @@ image:
   path: /assets/img/arasaka/arasaka-banner.png
 ---
 
-This is a Hacksmarter Labs Active Directory challenge. Starting credentials are provided — `faraday:hacksmarter123`. The path chains through Kerberoasting, two hops of Shadow Credentials via certipy, and finally ADCS ESC1 to request a certificate as Administrator. The Administrator account has an expired password so we drop into an LDAP shell via pass-the-cert and reset it. A cleaner alternative path skips Administrator entirely and targets `THE_EMPEROR` via the same ESC1 template — that account has no expired password and hands us an NT hash directly.
+
 
 ---
-
 ## Reconnaissance
 
 ### Port Scan
@@ -245,55 +244,33 @@ ewp -i 10.1.221.39 -u THE_EMPEROR -H d87640b0d83dc7f90f5f30bd6789b133
 ## Attack Flow
 
 ```text
-                   hacksmarter.local
-                          |
-              [Starting creds: faraday:hacksmarter123]
-                          |
-                [nxc ldap --kerberoasting]
-                alt.svc TGS → babygirl1
-                          |
-                [BloodHound ACL chain]
-         ALT.SVC → GenericAll → YORINOBU
-         YORINOBU → GenericWrite → SOULKILLER.SVC
-                          |
-              [certipy shadow auto x2]
-         YORINOBU NT hash → SOULKILLER.SVC NT hash
-                          |
-       [BloodHound - Enroll on AI_TAKEOVER template]
-              certipy find -vuln → ESC1
-                          |
-              --- Method 1: Administrator ---
-              certipy req -upn administrator
-                  KDC_ERR_KEY_EXPIRED
-              certipy auth -ldap-shell
-                change_password → WinRM
-                          |
-              --- Method 2: THE_EMPEROR ---
-              certipy req -upn THE_EMPEROR
-                certipy auth → NT hash
-                   ewp PTH → shell
-                          |
-                   DOMAIN COMPROMISED
+                     hacksmarter.local
+                            |
+                [Starting creds: faraday:hacksmarter123]
+                            |
+                  [nxc ldap --kerberoasting]
+                  alt.svc TGS → babygirl1
+                            |
+                  [BloodHound ACL chain]
+           ALT.SVC → GenericAll → YORINOBU
+           YORINOBU → GenericWrite → SOULKILLER.SVC
+                            |
+                [certipy shadow auto x2]
+           YORINOBU NT hash → SOULKILLER.SVC NT hash
+                            |
+         [BloodHound - Enroll on AI_TAKEOVER template]
+                certipy find -vuln → ESC1
+                            |
+                --- Method 1: Administrator ---
+                certipy req -upn administrator
+                    KDC_ERR_KEY_EXPIRED
+                certipy auth -ldap-shell
+                  change_password → WinRM
+                            |
+                --- Method 2: THE_EMPEROR ---
+                certipy req -upn THE_EMPEROR
+                  certipy auth → NT hash
+                     ewp PTH → shell
+                            |
+                     DOMAIN COMPROMISED
 ```
-
----
-
-## Techniques
-
-| Technique | Where Used |
-|-----------|------------|
-| Kerberoasting | nxc ldap --kerberoasting → alt.svc:babygirl1 |
-| Shadow Credentials | certipy shadow auto x2 → YORINOBU + SOULKILLER.SVC NT hashes |
-| ADCS ESC1 | AI_Takeover template, enrollee-supplied SAN → impersonate any user |
-| LDAP Pass-the-Cert | certipy auth -ldap-shell → Administrator password reset |
-| Pass-the-Hash | THE_EMPEROR NT hash → WinRM shell |
-
----
-
-## References
-
-- [certipy - ly4k](https://github.com/ly4k/Certipy)
-- [ADCS ESC1 - HackTricks](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation#misconfigured-certificate-templates-esc1)
-- [Shadow Credentials - HackTricks](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/shadow-credentials)
-- [rusthound-ce](https://github.com/g0h4n/RustHound-CE)
-- [evil-winrm-py](https://github.com/adityatelange/evil-winrm-py)
