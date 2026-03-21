@@ -6,6 +6,10 @@ tags: [Windows, AD, AS-REP-Roasting, ACL-Abuse, LSASS, Backup-Operators, Pass-th
 image:
   path: /assets/img/blackfield/blackfield.png
 ---
+
+
+
+---
 ## Reconnaissance
 
 ### Port Scan
