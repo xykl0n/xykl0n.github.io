@@ -293,7 +293,7 @@ Domain fully compromised.
 ## Attack Flow
 
 ```text
-                                 BLACKFIELD.local
+                                    BLACKFIELD.local
 																	 |
 													  +--------------+--------------+
 													  |                             |
@@ -327,5 +327,5 @@ Domain fully compromised.
 														   [secretsdump local]
 														  Administrator NT hash
 																	|
-																DOMAIN COMPROMISED
+															DOMAIN COMPROMISED
 ```
