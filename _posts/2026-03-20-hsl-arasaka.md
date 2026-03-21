@@ -1,7 +1,7 @@
 ---
 title: "HSL - Arasaka"
 date: 2026-03-20
-categories: [HSL, Active Directory]
+categories: [HSL, HSL-AD]
 tags: [Windows, AD, Kerberoasting, Shadow-Credentials, ADCS, ESC1, BloodHound, certipy, Pass-the-Hash]
 image:
   path: /assets/img/arasaka/arasaka-banner.png
