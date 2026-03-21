@@ -3,12 +3,9 @@ title: "HTB - Blackfield"
 date: 2026-03-05
 categories: [HTB, Active Directory]
 tags: [Windows, AD, AS-REP-Roasting, ACL-Abuse, LSASS, Backup-Operators, Pass-the-Hash, BloodHound, kerbrute]
+image:
+  path: /assets/img/blackfield/blackfield.png
 ---
-
-Blackfield is a Hard-rated Windows Active Directory machine that chains together several classic but satisfying techniques. It starts with unauthenticated SMB enumeration, moves through AS-REP roasting with a subtle AES downgrade twist, leverages BloodHound-discovered ACL abuse to pivot accounts, cracks open an LSASS memory dump hiding in a forensic share, and finishes with a Backup Operators privilege escalation to dump NTDS and fully compromise the domain. Every step rewards methodical enumeration — nothing here is handed to you.
-
----
-
 ## Reconnaissance
 
 ### Port Scan
@@ -34,9 +31,6 @@ Classic DC fingerprint — DNS, Kerberos, LDAP, SMB, and WinRM all present. Doma
 nxc smb 10.129.229.17 --generate-hosts-file host
 cat host | sudo tee -a /etc/hosts
 ```
-
-Now everything resolves cleanly. Let's start pulling at SMB.
-
 ---
 ## SMB Enumeration
 
@@ -295,64 +289,39 @@ Domain fully compromised.
 ## Attack Flow
 
 ```text
-																BLACKFIELD.local
-																	 |
-													  +--------------+--------------+
-													  |                             |
-												 [Guest SMB]                  [RID Cycling]
-												 profiles$ READ               users.txt
-													  |                             |
-													  +-------------+---------------+
-																	|
-																 [AS-REP Roast]
-														  kerbrute --downgrade
-																	|
-														   support:#00^BlackKnight
-																	|
-																 [BloodHound]
-														  ForceChangePassword
-																	|
-														   audit2020:Password123
-																	|
-														  [forensic share READ]
-																 lsass.zip / lsass.DMP
-																	|
-																 [pypykatz parse]
-														  svc_backup NT hash
-																	|
-																  [WinRM PTH]
-														  Backup Operators group
-																	|
-													  [diskshadow + robocopy + reg save]
-														  ntds.dit + SYSTEM hive
-																	|
-														   [secretsdump local]
-														  Administrator NT hash
-																	|
-																DOMAIN COMPROMISED
+  																BLACKFIELD.local
+  																	 |
+  													  +--------------+--------------+
+  													  |                             |
+  												 [Guest SMB]                  [RID Cycling]
+  												 profiles$ READ               users.txt
+  													  |                             |
+  													  +-------------+---------------+
+  																	|
+  																 [AS-REP Roast]
+  														  kerbrute --downgrade
+  																	|
+  														   support:#00^BlackKnight
+  																	|
+  																 [BloodHound]
+  														  ForceChangePassword
+  																	|
+  														   audit2020:Password123
+  																	|
+  														  [forensic share READ]
+  																 lsass.zip / lsass.DMP
+  																	|
+  																 [pypykatz parse]
+  														  svc_backup NT hash
+  																	|
+  																  [WinRM PTH]
+  														  Backup Operators group
+  																	|
+  													  [diskshadow + robocopy + reg save]
+  														  ntds.dit + SYSTEM hive
+  																	|
+  														   [secretsdump local]
+  														  Administrator NT hash
+  																	|
+  																DOMAIN COMPROMISED
 ```
-
----
-
-## Techniques
-
-| Technique | Where Used |
-|-----------|------------|
-| RID Cycling | Guest IPC$ access → user enumeration |
-| AS-REP Roasting (RC4 downgrade) | support account, kerbrute --downgrade |
-| ACL Abuse — ForceChangePassword | support → audit2020 via nxc module |
-| LSASS Minidump Parsing | pypykatz on forensic share dump |
-| Pass-the-Hash | svc_backup NT hash → WinRM |
-| Backup Operators Abuse | diskshadow VSS → NTDS.dit extraction |
-| Offline Hash Dump | secretsdump on ntds.dit + SYSTEM |
-
----
-
-## References
-
-- [kerbrute - ropnop](https://github.com/ropnop/kerbrute)
-- [rusthound-ce](https://github.com/g0h4n/RustHound-CE)
-- [pypykatz](https://github.com/skelsec/pypykatz)
-- [evil-winrm-py](https://github.com/adityatelange/evil-winrm-py)
-- [Backup Operators Privilege Escalation](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges)
-- [AS-REP Roasting - HackTricks](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproast)
