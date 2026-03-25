@@ -1,7 +1,7 @@
 ---
 title: "HTB - Sendai"
 date: 2026-03-24
-categories: [VL, VL-AD]
+categories: [HTB, HTB-AD]
 tags: [Windows, AD, GMSA, ADCS, ESC4, ACL-Abuse, Silver-Ticket, SeImpersonatePrivilege, Ligolo, GodPotato]
 image:
   path: /assets/img/sendai/sendai-banner.png
