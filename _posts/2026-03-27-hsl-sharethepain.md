@@ -4,13 +4,12 @@ date: 2026-03-27
 categories: [HSL, HSL-AD]
 tags: [Windows, AD, NTLM-Capture, Responder, ACL-Abuse, MSSQL, SeImpersonatePrivilege, GodPotato, SeManageVolumePrivilege, Ligolo]
 image:
-  path: /assets/img/sharethepain/sharethepain-banner.png
+  path: /assets/img/sharethepain/sharethepain-banner.jpg
 ---
 
-ShareThePain is a medium-difficulty Hack Smarter Labs challenge. The attack path starts with a guest-writable SMB share — drop a malicious shortcut via the `slinky` NXC module, catch the NTLMv2 hash with Responder, and crack it to get `bob.ross`. BloodHound shows full control over `alice.wonderland`, reset her password, and get a WinRM foothold. MSSQL is running locally bound to localhost — tunnel in via Ligolo-ng, connect as sysadmin, and abuse `SeImpersonatePrivilege` via GodPotato for SYSTEM. A second path abuses `SeManageVolumePrivilege` via a `tzres.dll` hijack.
+
 
 ---
-
 ## Reconnaissance
 
 ### Port Scan
@@ -145,8 +144,6 @@ WINRM  10.1.2.10  5985  DC01  [+] hack.smarter\ALICE.WONDERLAND:Password1 (Pwn3d
 ```bash
 ewp -i hack.smarter -u ALICE.WONDERLAND -p Password1
 ```
-
-> **Note:** `ewp` is [evil-winrm-py](https://github.com/adityatelange/evil-winrm-py) — the Python port of evil-winrm.
 
 Poking around the filesystem, `SQL2019` stands out — MSSQL wasn't in the nmap results:
 
@@ -299,62 +296,35 @@ SYSTEM shell via DLL hijack.
 ## Attack Flow
 
 ```text
-	                                hack.smarter
-	                                     |
-	                        [SMB — guest READ/WRITE]
-	                        Share writable as guest
-	                                     |
-	                        [nxc slinky + Responder]
-	                        bob.ross NTLMv2 captured
-	                        hashcat → 137Password123!@#
-	                                     |
-	                             [BloodHound]
-	                         bob.ross GenericAll/Owns
-	                         → ALICE.WONDERLAND
-	                                     |
-	                        [bloodyAD set password]
-	                        alice.wonderland:Password1
-	                                     |
-	                   [WinRM — REMOTE MANAGEMENT USERS]
-	                        ewp foothold as alice
-	                                     |
-	                   [netstat → MSSQL localhost:1433]
-	                   Ligolo-ng tunnel → 240.0.0.1
-	                                     |
-	                   [nxc mssql → Pwn3d! (sysadmin)]
-	                   mssqlclient.py -windows-auth
-	                   xp_cmdshell → hoaxshell
-	                   NT SERVICE\MSSQL$SQLEXPRESS
-	                                     |
-	                   [SeImpersonatePrivilege]
-	                        GodPotato → SYSTEM
-	                                     |
-	                                   SYSTEM
+  	                                hack.smarter
+  	                                     |
+  	                        [SMB — guest READ/WRITE]
+  	                        Share writable as guest
+  	                                     |
+  	                        [nxc slinky + Responder]
+  	                        bob.ross NTLMv2 captured
+  	                        hashcat → 137Password123!@#
+  	                                     |
+  	                             [BloodHound]
+  	                         bob.ross GenericAll/Owns
+  	                         → ALICE.WONDERLAND
+  	                                     |
+  	                        [bloodyAD set password]
+  	                        alice.wonderland:Password1
+  	                                     |
+  	                   [WinRM — REMOTE MANAGEMENT USERS]
+  	                        ewp foothold as alice
+  	                                     |
+  	                   [netstat → MSSQL localhost:1433]
+  	                   Ligolo-ng tunnel → 240.0.0.1
+  	                                     |
+  	                   [nxc mssql → Pwn3d! (sysadmin)]
+  	                   mssqlclient.py -windows-auth
+  	                   xp_cmdshell → hoaxshell
+  	                   NT SERVICE\MSSQL$SQLEXPRESS
+  	                                     |
+  	                   [SeImpersonatePrivilege]
+  	                        GodPotato → SYSTEM
+  	                                     |
+  	                                   SYSTEM
 ```
-
----
-
-## Techniques
-
-| Technique | Where Used |
-|-----------|------------|
-| NTLM Coercion via slinky | Guest writable share → NTLMv2 capture |
-| NTLMv2 Cracking | hashcat -m 5600 → bob.ross:137Password123!@# |
-| GenericAll ACL Abuse | bob.ross → password reset on alice.wonderland |
-| Ligolo-ng Tunneling | localhost MSSQL access via agent pivot |
-| MSSQL Sysadmin Abuse | xp_cmdshell → hoaxshell stager |
-| SeImpersonatePrivilege Abuse | GodPotato → SYSTEM |
-| SeManageVolumePrivilege Abuse | tzres.dll hijack → SYSTEM via systeminfo |
-
----
-
-## References
-
-- [bloodyAD - CravateRouge](https://github.com/CravateRouge/bloodyAD)
-- [rusthound-ce](https://github.com/g0h4n/RustHound-CE)
-- [evil-winrm-py](https://github.com/adityatelange/evil-winrm-py)
-- [ligolo-ng](https://github.com/nicocha30/ligolo-ng)
-- [GodPotato - BeichenDream](https://github.com/BeichenDream/GodPotato)
-- [SeManageVolumeExploit - CsEnox](https://github.com/CsEnox/SeManageVolumeExploit)
-- [hoaxshell](https://github.com/t3l3machus/hoaxshell)
-- [SeImpersonatePrivilege - HackTricks](https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens#seimpersonateprivilege)
