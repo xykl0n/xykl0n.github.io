@@ -1,6 +1,6 @@
 ---
 title: "HSL - ShareThePain"
-date: 2026-03-27
+date: 2026-03-26
 categories: [HSL, HSL-AD]
 tags: [Windows, AD, NTLM-Capture, Responder, ACL-Abuse, MSSQL, SeImpersonatePrivilege, GodPotato, SeManageVolumePrivilege, Ligolo]
 image:
