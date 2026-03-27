@@ -296,35 +296,38 @@ SYSTEM shell via DLL hijack.
 ## Attack Flow
 
 ```text
-  	                                hack.smarter
-  	                                     |
-  	                        [SMB — guest READ/WRITE]
-  	                        Share writable as guest
-  	                                     |
-  	                        [nxc slinky + Responder]
-  	                        bob.ross NTLMv2 captured
-  	                        hashcat → 137Password123!@#
-  	                                     |
-  	                             [BloodHound]
-  	                         bob.ross GenericAll/Owns
-  	                         → ALICE.WONDERLAND
-  	                                     |
-  	                        [bloodyAD set password]
-  	                        alice.wonderland:Password1
-  	                                     |
-  	                   [WinRM — REMOTE MANAGEMENT USERS]
-  	                        ewp foothold as alice
-  	                                     |
-  	                   [netstat → MSSQL localhost:1433]
-  	                   Ligolo-ng tunnel → 240.0.0.1
-  	                                     |
-  	                   [nxc mssql → Pwn3d! (sysadmin)]
-  	                   mssqlclient.py -windows-auth
-  	                   xp_cmdshell → hoaxshell
-  	                   NT SERVICE\MSSQL$SQLEXPRESS
-  	                                     |
-  	                   [SeImpersonatePrivilege]
-  	                        GodPotato → SYSTEM
-  	                                     |
-  	                                   SYSTEM
+	                                  hack.smarter
+	                                       |
+	                            [SMB — guest READ/WRITE]
+	                            Share writable as guest
+	                                       |
+	                            [nxc slinky + Responder]
+	                            bob.ross NTLMv2 captured
+	                          hashcat → 137Password123!@#
+	                                       |
+	                                  [BloodHound]
+	                  bob.ross GenericAll/Owns → ALICE.WONDERLAND
+	                                       |
+	                            [bloodyAD set password]
+	                           alice.wonderland:Password1
+	                                       |
+	                       [WinRM — REMOTE MANAGEMENT USERS]
+	                             ewp foothold as alice
+	                                       |
+	                        [netstat → MSSQL localhost:1433]
+	                          Ligolo-ng tunnel → 240.0.0.1
+	                                       |
+	                        [nxc mssql → Pwn3d! (sysadmin)]
+	                          mssqlclient.py -windows-auth
+	                            xp_cmdshell → hoaxshell
+	                          NT SERVICE\MSSQL$SQLEXPRESS
+	                                       |
+	                    --- Method 1: SeImpersonatePrivilege ---
+	                               GodPotato → SYSTEM
+	                                       |
+	                   --- Method 2: SeManageVolumePrivilege ---
+	                                tzres.dll hijack
+	                         systeminfo → DLL load → SYSTEM
+	                                       |
+	                                     SYSTEM
 ```
